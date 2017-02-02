@@ -9,6 +9,7 @@ extern "C" {
 }
 
 #include "nao.h"
+#include "joint.h"
 
 int portNumber = 25000;
 
@@ -20,37 +21,17 @@ int main() {
     return -1;
   }
 
-  simxInt rightArmShapesHandles[legShapeCount];
-  simxInt rightArmJointsHandles[legJointCount];
+  std::vector<Joint> joints;
 
   for(int i = 0; i < armJointCount; i++) {
-    simxGetObjectHandle(clientID, rightArmJoints[i],
-      &rightArmJointsHandles[i], simx_opmode_oneshot_wait);
+    joints.push_back( Joint(clientID, rightArmJoints[i], -1, 1, 0.01, -1) );
+    joints.push_back( Joint(clientID, leftArmJoints[i], -1, 1, 0.01, -1) );
   }
-
-  for(int i = 0; i < armShapeCount; i++) {
-    simxGetObjectHandle(clientID, rightArmShapes[i],
-      &rightArmShapesHandles[i], simx_opmode_oneshot_wait);
-  }
-
-  float angle = 0;
-  bool ascending = true;
 
   while (true) {
-    for (simxInt &joint : rightArmJointsHandles) {
-      simxSetJointTargetPosition(clientID, joint, angle, simx_opmode_oneshot);
+    for (Joint &joint : joints) {
+      joint.update();
     }
-
-    if ( (angle <= -3 && !ascending) || (angle >= 3.1 && ascending) ) {
-      ascending = !ascending;
-    }
-
-    if (ascending) {
-      angle += 0.1;
-    } else {
-      angle -= 0.1;
-    }
-
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 

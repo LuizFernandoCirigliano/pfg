@@ -1,37 +1,76 @@
-#include "joint.h"
+#include "joint.hpp"
+#include "helpers.hpp"
+#include <iostream>
 
-Joint::Joint(int clientID, const char* jointName, double minAngle,
-  double maxAngle, double speed, double initialAngle)
+Joint::Joint(int clientID, const char* name, double minAngle,
+  double maxAngle, double initialAngle, int steps, bool initialDirection) :
+  VRepClass(clientID, name),
+  _minAngle(minAngle),
+  _maxAngle(maxAngle),
+  _currentAngle(initialAngle),
+  _movingForward(initialDirection),
+  _speed( (maxAngle - minAngle)/steps )
+{
+  log_response(
+    simxSetJointPosition(_clientID, _handle, _initialAngle, simx_opmode_blocking)
+  );
+}
+
+Joint::Joint(int clientID, simxInt handle) :
+  VRepClass(clientID, handle),
+  _minAngle(-3.14),
+  _maxAngle(3.14),
+  _currentAngle(0),
+  _movingForward(true),
+  _speed(0.1)
+{
+  simxGetJointPosition(_clientID, _handle, &_initialAngle, simx_opmode_blocking);
+  std::cout << "Joint: " << _handle << " Angle: "  << _initialAngle << std::endl;
+}
+
+void Joint::setJointStats(double minAngle, double maxAngle, double currentAngle, double steps)
 {
   _minAngle = minAngle;
   _maxAngle = maxAngle;
-  _speed = speed;
-  _clientID = clientID;
-  _initialAngle = initialAngle;
-
-  simxGetObjectHandle(clientID, jointName, &_jointHandler,
-    simx_opmode_oneshot_wait);
-  simxSetJointTargetPosition(_clientID, _jointHandler, initialAngle, simx_opmode_oneshot);
+  _currentAngle = currentAngle;
+  _speed = (maxAngle - minAngle)/steps;
 }
-
 void Joint::update()
 {
   // Invert direction of movement if at edge.
-  if ( (_currentAngle >= _maxAngle && _movingForward) ||
-    (_currentAngle <= _minAngle && !_movingForward) ) {
+  double newAngle = _currentAngle;
+  if ( (newAngle >= _maxAngle && _movingForward) ||
+    (newAngle <= _minAngle && !_movingForward) ) {
     _movingForward = !_movingForward;
   }
   if ( _movingForward ) {
-    _currentAngle += _speed;
-    if (_currentAngle > _maxAngle) {
-      _currentAngle = _maxAngle;
+    newAngle += _speed;
+    if (newAngle > _maxAngle) {
+      newAngle = _maxAngle;
     }
   } else {
-    _currentAngle -= _speed;
-    if (_currentAngle < _minAngle) {
-      _currentAngle = _minAngle;
+    newAngle -= _speed;
+    if (newAngle < _minAngle) {
+      newAngle = _minAngle;
     }
   }
+  this->setJointTargetPosition(newAngle);
+}
 
-  simxSetJointTargetPosition(_clientID, _jointHandler, _currentAngle, simx_opmode_oneshot);
+void Joint::reset()
+{
+  this->setJointTargetPosition(_initialAngle);
+  _movingForward = true;
+}
+
+void Joint::setJointTargetPosition(double targetAngle)
+{
+  _currentAngle = targetAngle;
+  int ret = simxSetJointTargetPosition(_clientID, _handle, targetAngle, simx_opmode_oneshot);
+
+  if (ret) {
+    std::cout << "Error in joint " << _handle << " for angle " << targetAngle
+      << "." << std::endl;
+    log_response(ret);
+  }
 }

@@ -15,6 +15,7 @@ public:
   Robot(int clientID, const char* name);
   void reset();
   void update();
+  void setGenome( double genome[45] );
 };
 
 #endif

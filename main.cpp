@@ -1,14 +1,9 @@
-#include <vector>
 #include <iostream>
-
-#include <chrono>
-#include <thread>
 
 extern "C" {
   #include "extApi.h"
 }
 
-#include "joint.hpp"
 #include "robot.hpp"
 
 const int portNumber = 25000;
@@ -25,11 +20,15 @@ int main() {
 
   Robot r(clientID, "NAO");
 
+  double genome[45] = {0};
   while(true) {
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < 100; i++) {
       r.update();
     }
-
+    for (int i = 0; i < 45; i++) {
+      genome[i] = (((double)(rand() % 100)) / 100) * 3;
+    }
+    r.setGenome(genome);
     r.reset();
   }
 

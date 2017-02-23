@@ -5,19 +5,16 @@
 
 class Joint : public VRepClass {
 private:
-  bool _movingForward;
-  double _currentAngle;
-  double _minAngle;
-  double _maxAngle;
-  simxFloat _initialAngle;
-  double _speed;
+  double _posAmp;
+  double _negAmp;
+  double _zeroAngle;
+  double _t;
+  double _initPhase;
   void setJointTargetPosition(double targetAngle);
 public:
-  Joint(int clientID, const char* name, double minAngle, double maxAngle,
-     double initialAngle, int steps, bool initialDirection);
-  Joint(int clientID, simxInt handle);
-  void setJointStats(double minAngle, double maxAngle, double currentAngle,
-    double steps);
+  Joint(int clientID, simxInt handle, double initPhase);
+  Joint(int clientID, const char *jointName, double initPhase);
+  void setJointStats(double posAmp, double negAmp, double zeroAngle);
   void update();
   void reset();
 };

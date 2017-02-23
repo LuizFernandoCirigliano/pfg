@@ -7,6 +7,8 @@ extern "C" {
 
 #include <iostream>
 
+#define PI 3.14159265
+
 inline void log_response(int code) {
   if (code == 0) return;
 

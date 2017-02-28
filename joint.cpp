@@ -41,6 +41,7 @@ void Joint::reset() {
 void Joint::setJointTargetPosition(double targetAngle) {
   int ret = simxSetJointTargetPosition(_clientID, _handle, targetAngle, simx_opmode_oneshot);
 
+  if (DISABLE_LOG) return;
   if (ret) {
     std::cout << "Error in joint " << _handle << " for angle " << targetAngle
       << "." << std::endl;

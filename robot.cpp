@@ -60,10 +60,10 @@ Robot::Robot(int clientID, const char* name) :
     _shapes.push_back( Shape( clientID, shapeHandles[i]) );
   }
 
-  // for (int i = 0; i < 10; i++) {
-  //   _joints.push_back( Joint( clientID, rightLegJoints[i], 0.0 ) );
-  //   _joints.push_back( Joint( clientID, leftLegJoints[i], 0.5 ) );
-  // }
+  for (int i = 0; i < 10; i++) {
+    _joints.push_back( Joint( clientID, rightLegJoints[i], 0.0 ) );
+    _joints.push_back( Joint( clientID, leftLegJoints[i], 0.5 ) );
+  }
   for (int i = 0; i < 5; i++) {
     _joints.push_back( Joint( clientID, rightArmJoints[i], 0.0 ) );
     _joints.push_back( Joint( clientID, leftArmJoints[i], 0.5 ) );
@@ -109,8 +109,20 @@ void Robot::reset() {
 }
 
 void Robot::setGenome(double genome[45]) {
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 15; i++) {
     _joints[2*i].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2]);
     _joints[2*i + 1].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2]);
   }
+}
+
+double Robot::getXDistance() {
+  simxFloat position[3];
+  simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
+  return position[0] - _initialPosition[0];
+}
+
+void Robot::printPosition() {
+  simxFloat position[3];
+  simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
+  std::cout << "[" << position[0] << ", " << position[1] << ", " << position[2] << "]" << std::endl;
 }

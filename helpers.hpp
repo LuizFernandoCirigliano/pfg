@@ -8,9 +8,10 @@ extern "C" {
 #include <iostream>
 
 #define PI 3.14159265
+#define DISABLE_LOG 1
 
 inline void log_response(int code) {
-  if (code == 0) return;
+  if (DISABLE_LOG || code == 0) return;
 
   std::cout << "Error Code: ";
   if ( code & simx_return_novalue_flag) {

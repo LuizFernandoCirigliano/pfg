@@ -16,6 +16,8 @@ public:
   void reset();
   void update();
   void setGenome( double genome[45] );
+  void printPosition();
+  double getXDistance();
 };
 
 #endif

@@ -2,6 +2,14 @@ CFLAGS = -I./remoteApi -I./include -DNON_MATLAB_PARSING \
 -DMAX_EXT_API_CONNECTIONS=255 -m64 -stdlib=libc++ -D_GLIBCXX_USE_CXX11_ABI=0
 CPPFLAGS = -std=c++11
 
+LIB   =libga.a
+# Set these paths to the location of the GA library and headers.
+GA_INC_DIR= ../../galib247
+GA_LIB_DIR= ../../galib247/ga
+
+INC_DIRS= -I$(GA_INC_DIR)
+LIB_DIRS= -L$(GA_LIB_DIR)
+
 OS = $(shell uname -s)
 ifeq ($(OS), Linux)
     CXXFLAGS += -D__linux
@@ -16,8 +24,8 @@ all:
 	g++ $(CFLAGS) $(CPPFLAGS) -c shape.cpp -o shape.o
 	g++ $(CFLAGS) $(CPPFLAGS) -c joint.cpp -o joint.o
 	g++ $(CFLAGS) $(CPPFLAGS) -c robot.cpp -o robot.o
-	g++ $(CFLAGS) $(CPPFLAGS) -c main.cpp -o main.o
+	g++ $(INC_DIRS) -lm $(CFLAGS) $(CPPFLAGS) -c main.cpp -o main.o
 	gcc $(CFLAGS) -c ./remoteApi/extApi.c -o extApi.o
 	gcc $(CFLAGS) -c ./remoteApi/extApiPlatform.c -o extApiPlatform.o
 	@mkdir -p bin
-	g++ extApi.o extApiPlatform.o VRepClass.o shape.o joint.o robot.o main.o -o bin/main -lpthread
+	g++ extApi.o extApiPlatform.o VRepClass.o shape.o joint.o robot.o main.o -o bin/main -lpthread $(LIB_DIRS) -lga -lm

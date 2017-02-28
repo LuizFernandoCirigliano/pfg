@@ -25,14 +25,14 @@ void Shape::reset() {
     _initialPosition, simx_opmode_oneshot);
 
   if (ret) {
-    std::cout << "**ERROR: setting position for shape " << _handle << std::endl;
+    // std::cout << "**ERROR: setting position for shape " << _handle << std::endl;
     log_response(ret);
   }
   ret = simxSetObjectOrientation(_clientID, _handle, sim_handle_parent,
     _initialOrientation, simx_opmode_oneshot);
 
   if (ret) {
-    std::cout << "**ERROR: setting orientation for shape " << _handle << std::endl;
+    // std::cout << "**ERROR: setting orientation for shape " << _handle << std::endl;
     log_response(ret);
   }
 }

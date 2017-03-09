@@ -2,19 +2,11 @@ CFLAGS = -I./remoteApi -I./include -DNON_MATLAB_PARSING \
 -DMAX_EXT_API_CONNECTIONS=255 -m64 -stdlib=libc++ -D_GLIBCXX_USE_CXX11_ABI=0
 CPPFLAGS = -std=c++11
 
-LIB   =libga.a
-# Set these paths to the location of the GA library and headers.
-GA_INC_DIR= ../../galib247
-GA_LIB_DIR= ../../galib247/ga
-
-INC_DIRS= -I$(GA_INC_DIR)
-LIB_DIRS= -L$(GA_LIB_DIR)
-
 OS = $(shell uname -s)
 ifeq ($(OS), Linux)
-    CXXFLAGS += -D__linux
+    CPPFLAGS += -D__linux
 else
-    CXXFLAGS += -D__APPLE__
+    CPPFLAGS += -D__APPLE__
 endif
 
 all:

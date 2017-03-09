@@ -54,6 +54,7 @@ int main() {
 float Objective(GAGenome& g) {
   GARealGenome& genome = (GARealGenome&)g;
   double params[45];
+  std::cout << "=======================" << std::endl;
   for(int i=0; i<genome.length(); i++){
     std::cout << std::setprecision(2) << genome.gene(i) << " ";
     params[i] = genome.gene(i);
@@ -66,6 +67,6 @@ float Objective(GAGenome& g) {
     r->update();
   }
   float score = 1 + r->getXDistance();
-  std::cout << "Score: " << score << std::endl;
+  std::cout << "SCORE: " << score << std::endl;
   return score;
 }

@@ -3,39 +3,76 @@
 #include <iostream>
 #include <math.h>
 
-Joint::Joint(int clientID, simxInt handle, double initPhase) :
-  VRepClass(clientID, handle),
-  _posAmp(3.14),
-  _negAmp(3.14),
-  _zeroAngle(0),
-  _t(initPhase),
-  _initPhase(initPhase) {}
+Joint::Joint(int clientID, const char *jointName, bool inverted) :
+  VRepClass(clientID, jointName) {
+    _inverted = inverted;
+  }
 
-Joint::Joint(int clientID, const char *jointName, double initPhase) :
-  VRepClass(clientID, jointName),
-  _posAmp(3.14),
-  _negAmp(3.14),
-  _zeroAngle(0),
-  _t(initPhase),
-  _initPhase(initPhase) {}
+void Joint::setJointStats(double maxAng, double minAng, double initPhase, double T) {
+  maxAng = 0;
+  minAng = -1;
+  if (_inverted) {
+    maxAng = -1*maxAng;
+    minAng = -1*minAng;
+  }
+  if (maxAng < minAng) {
+    double tmp = maxAng;
+    maxAng = minAng;
+    minAng = tmp;
+  }
+  _maxAng = maxAng;
+  _minAng = minAng;
+  // _T = 2;
 
-void Joint::setJointStats(double posAmp, double negAmp, double zeroAngle) {
-  _posAmp = posAmp;
-  _negAmp = negAmp;
-  _zeroAngle = zeroAngle;
+  _T = 4;
+  _velocity = (_maxAng - _minAng)*2/_T;
+  double phase = initPhase > 2*PI ? (initPhase - 2*PI) : initPhase;
+  if (phase > PI) {
+    _velocity = -1*_velocity;
+    phase = 2*PI - phase;
+  }
+  // if (_inverted) {
+  //   _velocity = -1*_velocity;
+  // }
+  _initialAngle = _minAng + (_maxAng - _minAng)*(phase/PI);
+  if (_initialAngle > _maxAng || _initialAngle < _minAng) {
+    std::cout << "Something is wrong yo" << std::endl;
+  }
+  std::cout << "--------" << std::endl;
+  std::cout << "phase: " << phase <<std::endl;
+  std::cout << "initialAngle: " << _initialAngle << std::endl;
+  std::cout << "maxAngle: " << _maxAng << std::endl;
+  std::cout << "minxAngle: " << _minAng << std::endl;
+  std::cout << "velocity: " << _velocity << std::endl;
+  std::cout << "--------" << std::endl;
 }
 
 void Joint::update() {
-  double amplitude = _t < 0.5 ? _posAmp : _negAmp;
-  double newAngle = _zeroAngle + amplitude * sin(2 * PI * _t);
-  _t += 0.01;
-  if (_t >= 1) _t = 0;
-  this->setJointTargetPosition(newAngle);
+  simxInt operationMode = _firstUpdate ? simx_opmode_streaming : simx_opmode_buffer;
+  simxFloat position;
+  int retValue;
+  simxGetJointPosition(_clientID, _handle, &position, operationMode);
+  if (_firstUpdate) {
+    // std::cout << "First update" << std::endl;
+    retValue = simxSetJointTargetVelocity(_clientID, _handle, _velocity, simx_opmode_oneshot);
+    _firstUpdate = false;
+  } else {
+    // std::cout << position << std::endl;
+    if (position < _minAng && _velocity < 0) {
+      _velocity = -1*_velocity;
+      retValue = simxSetJointTargetVelocity(_clientID, _handle, _velocity, simx_opmode_oneshot);
+    } else if (position > _maxAng && _velocity > 0) {
+      _velocity = -1*_velocity;
+      retValue = simxSetJointTargetVelocity(_clientID, _handle, _velocity, simx_opmode_oneshot);
+    }
+  }
+  if (retValue == -1) std::cout << "Error setting joint velocity" << std::endl;
 }
 
 void Joint::reset() {
-  _t = _initPhase;
-  this->setJointTargetPosition(_zeroAngle);
+  this->setJointTargetPosition(_initialAngle);
+  simxSetJointTargetVelocity(_clientID, _handle, 0, simx_opmode_oneshot);
+  _firstUpdate = true;
 }
 
 void Joint::setJointTargetPosition(double targetAngle) {

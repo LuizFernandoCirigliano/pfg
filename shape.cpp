@@ -3,8 +3,7 @@
 
 Shape::Shape(int clientID, const char* name, simxFloat (&position)[3],
   simxFloat (&orientation)[3]) :
-    VRepClass(clientID, name)
-{
+    VRepClass(clientID, name) {
   for (int i = 0; i < 3; i++) {
     _initialOrientation[i] = orientation[i];
     _initialPosition[i] = position[i];
@@ -13,8 +12,7 @@ Shape::Shape(int clientID, const char* name, simxFloat (&position)[3],
 }
 
 Shape::Shape(int clientID, simxInt handle) :
-  VRepClass(clientID, handle)
-{
+  VRepClass(clientID, handle) {
   _name = "";
   simxGetObjectPosition(clientID, handle, sim_handle_parent, _initialPosition, simx_opmode_blocking);
   simxGetObjectOrientation(clientID, handle, sim_handle_parent, _initialOrientation, simx_opmode_blocking);

@@ -3,40 +3,31 @@
 
 #include <chrono>
 #include <thread>
+#include <math.h>
 
 #include "helpers.hpp"
 
-const int step_ms = 50;
-
 const char* rightLegJoints[] = {
   "RHipYawPitch3",
-  "RHipRoll3",
+  // "RHipRoll3",
   "RHipPitch3",
   "RKneePitch3",
   "RAnklePitch3",
-  "RAnkleRoll3",
-  "NAO_RFsrRR",
-  "NAO_RFsrFR",
-  "NAO_RFsrRL",
-  "NAO_RFsrFL",
+  // "RAnkleRoll3",
 };
 
 const char *leftLegJoints[] = {
   "LHipYawPitch3",
-  "LHipRoll3",
+  // "LHipRoll3",
   "LHipPitch3",
   "LKneePitch3",
   "LAnklePitch3",
-  "LAnkleRoll3",
-  "NAO_LFsrRR",
-  "NAO_LFsrFR",
-  "NAO_LFsrRL",
-  "NAO_LFsrFL",
+  // "LAnkleRoll3",
 };
 
 const char *rightArmJoints[] = {
   "RShoulderPitch3",
-  "RShoulderRoll3",
+  // "RShoulderRoll3",
   "RElbowYaw3",
   "RElbowRoll3",
   "RWristYaw3"
@@ -44,11 +35,12 @@ const char *rightArmJoints[] = {
 
 const char *leftArmJoints[] = {
   "LShoulderPitch3",
-  "LShoulderRoll3",
+  // "LShoulderRoll3",
   "LElbowYaw3",
   "LElbowRoll3",
   "LWristYaw3"
 };
+
 
 Robot::Robot(int clientID, const char* name) :
   VRepClass(clientID, name) {
@@ -60,18 +52,19 @@ Robot::Robot(int clientID, const char* name) :
     _shapes.push_back( Shape( clientID, shapeHandles[i]) );
   }
 
-  for (int i = 0; i < 10; i++) {
-    _joints.push_back( Joint( clientID, rightLegJoints[i], 0.0 ) );
-    _joints.push_back( Joint( clientID, leftLegJoints[i], 0.5 ) );
+  for (int i = 0; i < legJointCount; i++) {
+    _joints.push_back( Joint( clientID, rightLegJoints[i], false ) );
+    _joints.push_back( Joint( clientID, leftLegJoints[i], false) );
   }
-  for (int i = 0; i < 5; i++) {
-    _joints.push_back( Joint( clientID, rightArmJoints[i], 0.0 ) );
-    _joints.push_back( Joint( clientID, leftArmJoints[i], 0.5 ) );
+  for (int i = 0; i < armJointCount; i++) {
+    _joints.push_back( Joint( clientID, rightArmJoints[i], false ) );
+    _joints.push_back( Joint( clientID, leftArmJoints[i], false ) );
   }
 
   simxGetObjectPosition(_clientID, _handle, -1, _initialPosition, simx_opmode_blocking);
   simxGetObjectOrientation(_clientID, _handle, -1, _initialOrientation, simx_opmode_blocking);
 }
+
 
 void Robot::update() {
   simxPauseCommunication(_clientID, 1);
@@ -80,7 +73,8 @@ void Robot::update() {
   }
   simxPauseCommunication(_clientID, 0);
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(step_ms));
+  // std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  simxSynchronousTrigger(_clientID);
 }
 
 void Robot::reset() {
@@ -108,10 +102,11 @@ void Robot::reset() {
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
-void Robot::setGenome(double genome[45]) {
-  for (int i = 0; i < 15; i++) {
-    _joints[2*i].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2]);
-    _joints[2*i + 1].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2]);
+void Robot::setGenome(double genome[3*jointCount + 1]) {
+  double T = genome[3*jointCount];
+  for (int i = 0; i < jointCount; i++) {
+    _joints[2*i].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2], T);
+    _joints[2*i + 1].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2] + PI, T);
   }
 }
 

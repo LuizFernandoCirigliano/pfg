@@ -6,6 +6,11 @@
 #include "shape.hpp"
 #include <vector>
 
+const int legJointCount = 4;
+const int armJointCount = 4;
+const int jointCount = legJointCount + armJointCount;
+
+
 class Robot : public VRepClass {
   simxFloat _initialPosition[3];
   simxFloat _initialOrientation[3];
@@ -15,9 +20,10 @@ public:
   Robot(int clientID, const char* name);
   void reset();
   void update();
-  void setGenome( double genome[45] );
+  void setGenome( double genome[3*jointCount + 1] );
   void printPosition();
   double getXDistance();
 };
+
 
 #endif

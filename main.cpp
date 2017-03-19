@@ -26,18 +26,21 @@ int main() {
   }
 
   r = new Robot(clientID, "NAO");
-  GARealAlleleSet alleles2(-2, 2);
-  int length = 45;
+  GARealAlleleSet alleles2(1, 2);
+  int length = 3*jointCount + 1;
   GARealGenome genome(length, alleles2, Objective);
 
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
   params.set(gaNnGenerations, 500);
-  params.set(gaNpopulationSize, 5);
+  params.set(gaNpopulationSize, 5); //Min 200
   params.set(gaNscoreFrequency, 10);
   params.set(gaNflushFrequency, 50);
   params.set(gaNselectScores, (int)GAStatistics::AllScores);
-  // params.parse(argc, argv, gaFalse);
+
+  //Taxa mutaçao 5%
+  //Taxa reproducao 70%
+  //Crossover ponto unico
 
   GASteadyStateGA ga1(genome);
   ga1.parameters(params);
@@ -47,13 +50,15 @@ int main() {
   std::cout << "the ga generated:\n" << ga1.statistics().bestIndividual() << std::endl;
 
   delete r;
+
+  simxFinish(clientID);
   return 0;
 }
 
 
 float Objective(GAGenome& g) {
   GARealGenome& genome = (GARealGenome&)g;
-  double params[45];
+  double params[jointCount];
   std::cout << "=======================" << std::endl;
   for(int i=0; i<genome.length(); i++){
     std::cout << std::setprecision(2) << genome.gene(i) << " ";

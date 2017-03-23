@@ -5,50 +5,9 @@
 #include <thread>
 
 #include "helpers.hpp"
+#include "NAO.hpp"
 
 const int step_ms = 50;
-
-const char* rightLegJoints[] = {
-  "RHipYawPitch3",
-  "RHipRoll3",
-  "RHipPitch3",
-  "RKneePitch3",
-  "RAnklePitch3",
-  "RAnkleRoll3",
-  "NAO_RFsrRR",
-  "NAO_RFsrFR",
-  "NAO_RFsrRL",
-  "NAO_RFsrFL",
-};
-
-const char *leftLegJoints[] = {
-  "LHipYawPitch3",
-  "LHipRoll3",
-  "LHipPitch3",
-  "LKneePitch3",
-  "LAnklePitch3",
-  "LAnkleRoll3",
-  "NAO_LFsrRR",
-  "NAO_LFsrFR",
-  "NAO_LFsrRL",
-  "NAO_LFsrFL",
-};
-
-const char *rightArmJoints[] = {
-  "RShoulderPitch3",
-  "RShoulderRoll3",
-  "RElbowYaw3",
-  "RElbowRoll3",
-  "RWristYaw3"
-};
-
-const char *leftArmJoints[] = {
-  "LShoulderPitch3",
-  "LShoulderRoll3",
-  "LElbowYaw3",
-  "LElbowRoll3",
-  "LWristYaw3"
-};
 
 Robot::Robot(int clientID, const char* name) :
   VRepClass(clientID, name) {
@@ -60,34 +19,40 @@ Robot::Robot(int clientID, const char* name) :
     _shapes.push_back( Shape( clientID, shapeHandles[i]) );
   }
 
-  for (int i = 0; i < 10; i++) {
-    _joints.push_back( Joint( clientID, rightLegJoints[i], 0.0 ) );
-    _joints.push_back( Joint( clientID, leftLegJoints[i], 0.5 ) );
-  }
-  for (int i = 0; i < 5; i++) {
-    _joints.push_back( Joint( clientID, rightArmJoints[i], 0.0 ) );
-    _joints.push_back( Joint( clientID, leftArmJoints[i], 0.5 ) );
-  }
+  _nao = new NAO(clientID);
+  _nao->getNAOJoints(_joints);
+  _numJoints = _joints.size();
 
   simxGetObjectPosition(_clientID, _handle, -1, _initialPosition, simx_opmode_blocking);
   simxGetObjectOrientation(_clientID, _handle, -1, _initialOrientation, simx_opmode_blocking);
+
 }
 
 void Robot::update() {
   simxPauseCommunication(_clientID, 1);
-  for (Joint &joint : _joints) {
-    joint.update();
+  for (auto &joint : _joints) {
+    joint->update();
   }
+  double leftAnkleAngle = -1*(_nao->_hip->_leftJoint->_currentAngle +
+    _nao->_knee->_leftJoint->_currentAngle);
+  double rightAnkleAngle = -1*(_nao->_hip->_rightJoint->_currentAngle +
+    _nao->_knee->_rightJoint->_currentAngle);
+
+  _nao->_ankle->_leftJoint->setJointTargetPosition(leftAnkleAngle);
+  _nao->_ankle->_rightJoint->setJointTargetPosition(rightAnkleAngle);
+
   simxPauseCommunication(_clientID, 0);
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(step_ms));
+  // std::this_thread::sleep_for(std::chrono::milliseconds(step_ms));
+  simxSynchronousTrigger(_clientID);
 }
 
 void Robot::reset() {
   simxPauseCommunication(_clientID, 1);
-  for ( Joint &j : _joints ) {
-    j.reset();
+  for ( auto &j : _joints ) {
+    j->reset();
   }
+  _nao->_ankle->reset();
   simxPauseCommunication(_clientID, 0);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -108,10 +73,9 @@ void Robot::reset() {
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
-void Robot::setGenome(double genome[45]) {
-  for (int i = 0; i < 15; i++) {
-    _joints[2*i].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2]);
-    _joints[2*i + 1].setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2]);
+void Robot::setGenome(double genome[]) {
+  for (int i = 0; i < _numJoints; i++) {
+    _joints[i]->setJointStats(genome[3*i], genome[3*i + 1], genome[3*i + 2]);
   }
 }
 

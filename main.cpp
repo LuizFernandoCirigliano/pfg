@@ -26,9 +26,16 @@ int main() {
   }
 
   r = new Robot(clientID, "NAO");
-  GARealAlleleSet alleles2(-2, 2);
-  int length = 45;
-  GARealGenome genome(length, alleles2, Objective);
+
+  GARealAlleleSetArray alleles;
+  for (int i = 0; i < r->_numJoints; i++) {
+    JointInterface *joint = r->_joints[i];
+    alleles.add(0.0 , joint->_upperBound);
+    alleles.add(joint->_lowerBound, 0.0);
+    alleles.add(0.0, 0.0);
+  }
+
+  GARealGenome genome(alleles, Objective);
 
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
@@ -53,10 +60,8 @@ int main() {
 
 float Objective(GAGenome& g) {
   GARealGenome& genome = (GARealGenome&)g;
-  double params[45];
-  std::cout << "=======================" << std::endl;
+  double params[genome.length()];
   for(int i=0; i<genome.length(); i++){
-    std::cout << std::setprecision(2) << genome.gene(i) << " ";
     params[i] = genome.gene(i);
   }
   std::cout << std::endl;

@@ -8,10 +8,11 @@ extern "C" {
 #include <iostream>
 
 #define PI 3.14159265
-#define DISABLE_LOG 1
+
+#define DEBUG //comment to disable debug
 
 inline void log_response(int code) {
-  if (DISABLE_LOG || code == 0) return;
+  if (code == 0) return;
 
   std::cout << "Error Code: ";
   if ( code & simx_return_novalue_flag) {

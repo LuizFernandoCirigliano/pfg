@@ -24,17 +24,17 @@ void Shape::reset() {
   int ret = simxSetObjectPosition(_clientID, _handle, sim_handle_parent,
     _initialPosition, simx_opmode_oneshot);
 
-  if (ret) {
-    // std::cout << "**ERROR: setting position for shape " << _handle << std::endl;
-    log_response(ret);
-  }
-  ret = simxSetObjectOrientation(_clientID, _handle, sim_handle_parent,
-    _initialOrientation, simx_opmode_oneshot);
+  // if (ret) {
+  //   std::cout << "ERROR: setting position for shape " << _name << std::endl;
+  //   log_response(ret);
+  // }
+  // ret = simxSetObjectOrientation(_clientID, _handle, sim_handle_parent,
+  //   _initialOrientation, simx_opmode_oneshot);
 
-  if (ret) {
-    // std::cout << "**ERROR: setting orientation for shape " << _handle << std::endl;
-    log_response(ret);
-  }
+  // if (ret) {
+  //   // std::cout << "**ERROR: setting orientation for shape " << _handle << std::endl;
+  //   log_response(ret);
+  // }
 }
 
 std::ostream& operator<< (std::ostream& stream, const Shape& shape) {

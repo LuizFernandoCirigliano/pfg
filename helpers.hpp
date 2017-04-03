@@ -9,6 +9,7 @@ extern "C" {
 
 #define PI 3.14159265
 
+const int dt_ms = 50;
 #define DEBUG //comment to disable debug
 
 inline void log_response(int code) {

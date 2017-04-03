@@ -19,7 +19,9 @@ all:
 	g++ $(CFLAGS) $(CPPFLAGS) -c jointPair.cpp -o jointPair.o
 	g++ $(CFLAGS) $(CPPFLAGS) -c robot.cpp -o robot.o
 	g++ $(CFLAGS) $(CPPFLAGS) -c main.cpp -o main.o -lm -L. -lga
+	g++ $(CFLAGS) $(CPPFLAGS) -c test.cpp -o test.o -lm -L. -lga
 	gcc $(CFLAGS) -c ./remoteApi/extApi.c -o extApi.o
 	gcc $(CFLAGS) -c ./remoteApi/extApiPlatform.c -o extApiPlatform.o
 	@mkdir -p bin
 	g++ NAO.o extApi.o extApiPlatform.o VRepClass.o shape.o joint.o jointPair.o robot.o main.o -o bin/main -lpthread -lga -lm
+	g++ NAO.o extApi.o extApiPlatform.o VRepClass.o shape.o joint.o jointPair.o robot.o test.o -o bin/test -lpthread -lga -lm

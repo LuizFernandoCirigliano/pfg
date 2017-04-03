@@ -4,7 +4,8 @@
 #include "VRepClass.hpp"
 #include "joint.hpp"
 #include "shape.hpp"
-#include "nao.hpp"
+#include "NAO.hpp"
+
 #include <vector>
 
 class Robot : public VRepClass {
@@ -20,9 +21,12 @@ public:
   Robot(int clientID, const char* name);
   void reset();
   void update();
-  void setGenome( double genome[] );
-  void printPosition();
+  void setGenome( const std::vector<double> &genome );
+  void printPosition(simxFloat* position);
   double getXDistance();
+  void moveToNeutralAngle();
+  double runExperiment( const std::vector<double> &genome );
+  std::vector< std::pair<double, double> > getAleles();
 };
 
 #endif

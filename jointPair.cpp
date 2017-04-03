@@ -1,11 +1,10 @@
 #include "jointPair.hpp"
 
-JointPair::JointPair(int clientID, const char *rightJointName,
-  const char *leftJointName, double lb, double ub) {
-    _leftJoint = new Joint(clientID, leftJointName, 0.5, lb, ub);
-    _rightJoint = new Joint(clientID, rightJointName, 0.0, lb, ub);
-    _upperBound = ub;
-    _lowerBound = lb;
+JointPair::JointPair(int clientID,
+  const char *rightJointName,
+  const char *leftJointName) {
+    _rightJoint = new Joint(clientID, rightJointName);
+    _leftJoint = new Joint(clientID, leftJointName);
   }
 
 
@@ -19,7 +18,17 @@ void JointPair::update() {
   _rightJoint->update();
 }
 
-void JointPair::setJointStats(double posAmp, double negAmp, double zeroAngle) {
-  _leftJoint->setJointStats(posAmp, negAmp, zeroAngle);
-  _rightJoint->setJointStats(posAmp, negAmp, zeroAngle);
+void JointPair::setJointStats(double posAmp, double negAmp, double neutralAngle, double phase, double T) {
+  _leftJoint->setJointStats(posAmp, negAmp, neutralAngle, phase, T);
+  _rightJoint->setJointStats(posAmp, negAmp, neutralAngle, phase + 0.5, T);
+}
+
+void JointPair::prepareMoveToNeutralAngle(double T_ms) {
+  _leftJoint->prepareMoveToNeutralAngle(T_ms);
+  _rightJoint->prepareMoveToNeutralAngle(T_ms);
+}
+
+void JointPair::moveToNeutralAngle() {
+  _leftJoint->moveToNeutralAngle();
+  _rightJoint->moveToNeutralAngle();
 }

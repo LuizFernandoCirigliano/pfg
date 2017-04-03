@@ -8,9 +8,11 @@
 class NAO {
 public:
   int _clientID;
+  Joint *_hip;
   JointPair *_knee;
   JointPair *_ankle;
-  JointPair *_hip;
+  JointPair *_legHip;
+  JointPair *_shoulder;
   NAO(int clientID);
   void getNAOJoints(std::vector<JointInterface *> &jointVector);
 };

@@ -14,7 +14,6 @@ extern "C" {
 const int portNumber = 25000;
 Robot* r = 0;
 
-void reset_scene();
 float Objective(GAGenome &);
 
 int main() {
@@ -26,22 +25,20 @@ int main() {
   }
 
   r = new Robot(clientID, "NAO");
+  simxSynchronous(clientID, true);
 
   GARealAlleleSetArray alleles;
-  for (int i = 0; i < r->_numJoints; i++) {
-    JointInterface *joint = r->_joints[i];
-    alleles.add(0.0 , joint->_upperBound);
-    alleles.add(joint->_lowerBound, 0.0);
-    alleles.add(0.0, 0.0);
+  for (auto &pair : r->getAleles()) {
+    alleles.add(pair.first, pair.second);
   }
 
   GARealGenome genome(alleles, Objective);
 
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
-  params.set(gaNnGenerations, 500);
-  params.set(gaNpopulationSize, 5);
-  params.set(gaNscoreFrequency, 10);
+  params.set(gaNnGenerations, 50);
+  params.set(gaNpopulationSize, 100);
+  params.set(gaNscoreFrequency, 5);
   params.set(gaNflushFrequency, 50);
   params.set(gaNselectScores, (int)GAStatistics::AllScores);
   // params.parse(argc, argv, gaFalse);
@@ -51,6 +48,9 @@ int main() {
   ga1.set(gaNscoreFilename, "bog1.dat");
   std::cout << "\nrunning ga number 1 (alternate allele(0) and allele(3))..."<< std::endl;
   ga1.evolve();
+
+  std::cout << "************************" << std::endl;
+  std::cout << ga1.statistics() << std::endl;
   std::cout << "the ga generated:\n" << ga1.statistics().bestIndividual() << std::endl;
 
   delete r;
@@ -60,18 +60,12 @@ int main() {
 
 float Objective(GAGenome& g) {
   GARealGenome& genome = (GARealGenome&)g;
-  double params[genome.length()];
+  std::vector<double> params;
   for(int i=0; i<genome.length(); i++){
-    params[i] = genome.gene(i);
+    params.push_back(genome.gene(i));
   }
   std::cout << std::endl;
-  r->setGenome(params);
-  r->reset();
-
-  for(int i = 0; i < 100; i++) {
-    r->update();
-  }
-  float score = 1 + r->getXDistance();
+  double score = r->runExperiment(params);
   std::cout << "SCORE: " << score << std::endl;
   return score;
 }

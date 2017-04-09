@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 
 extern "C" {
@@ -12,20 +13,24 @@ extern "C" {
 #include "robot.hpp"
 
 const int portNumber = 25000;
+std::ofstream csv;
+
 Robot* r = 0;
 
 float Objective(GAGenome &);
 
-int main() {
-  int clientID = simxStart("127.0.0.1", portNumber, true, true, 2000, 5);
+int main(int argc, const char** argv) {
+  const char *address = argc == 2 ? argv[1] : "127.0.0.1";
+  int clientID = simxStart(address, portNumber, true, true, 2000, 5);
 
   if (clientID == -1) {
     std::cout << "Failed to Connect" << std::endl;
     return -1;
   }
 
+  csv.open("ga.csv");
+
   r = new Robot(clientID, "NAO");
-  simxSynchronous(clientID, true);
 
   GARealAlleleSetArray alleles;
   for (auto &pair : r->getAleles()) {
@@ -36,15 +41,13 @@ int main() {
 
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
-  params.set(gaNnGenerations, 50);
+  params.set(gaNnGenerations, 200);
   params.set(gaNpopulationSize, 100);
-  params.set(gaNscoreFrequency, 5);
-  params.set(gaNflushFrequency, 50);
+  params.set(gaNscoreFrequency, 10);
   params.set(gaNselectScores, (int)GAStatistics::AllScores);
-  // params.parse(argc, argv, gaFalse);
 
   GASteadyStateGA ga1(genome);
-  ga1.parameters(params);
+  ga1.pReplacement(0.5);
   ga1.set(gaNscoreFilename, "bog1.dat");
   std::cout << "\nrunning ga number 1 (alternate allele(0) and allele(3))..."<< std::endl;
   ga1.evolve();
@@ -53,6 +56,7 @@ int main() {
   std::cout << ga1.statistics() << std::endl;
   std::cout << "the ga generated:\n" << ga1.statistics().bestIndividual() << std::endl;
 
+  csv.close();
   delete r;
   return 0;
 }
@@ -60,12 +64,20 @@ int main() {
 
 float Objective(GAGenome& g) {
   GARealGenome& genome = (GARealGenome&)g;
-  std::vector<double> params;
+  std::vector<float> params;
   for(int i=0; i<genome.length(); i++){
     params.push_back(genome.gene(i));
+    csv << std::setprecision(3) << params[i] << ", ";
   }
-  std::cout << std::endl;
-  double score = r->runExperiment(params);
-  std::cout << "SCORE: " << score << std::endl;
-  return score;
+  float avgScore = 0.0;
+  for(int i=0; i<3; i++) {
+    result res = r->runExperiment(params);
+    avgScore += res.score;
+    csv << std::setprecision(2) << res.time << ", ";
+    csv << std::setprecision(2) << res.distance << ", ";
+    csv << std::setprecision(2) << res.score << ", ";
+  }
+  avgScore = avgScore/3.0;
+  csv << std::setprecision(2) << avgScore << std::endl;
+  return avgScore;
 }

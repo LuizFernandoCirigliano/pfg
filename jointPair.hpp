@@ -10,10 +10,10 @@ public:
   JointPair(int clientID,
     const char *rightJointName,
     const char *leftJointName);
-  void setJointStats(double posAmp, double negAmp, double zeroAngle, double phase, double T);
+  void setJointStats(float posAmp, float negAmp, float zeroAngle, float phase, float T);
   void update();
   void reset();
-  void prepareMoveToNeutralAngle(double T_ms);
+  void prepareMoveToNeutralAngle(float T_ms);
   void moveToNeutralAngle();
 };
 

@@ -4,7 +4,6 @@ NAO::NAO(int clientID) :
   _clientID(clientID) {
     _hip = new Joint(_clientID, "RHipYawPitch3");
     _hip->_enabled = false;
-
     _legHip = new JointPair(_clientID, "RHipPitch3", "LHipPitch3");
     _knee =  new JointPair(_clientID, "RKneePitch3", "LKneePitch3");
     _ankle = new JointPair(_clientID, "RAnklePitch3", "LAnklePitch3");
@@ -15,7 +14,6 @@ NAO::NAO(int clientID) :
 void NAO::getNAOJoints(std::vector<JointInterface *> &jointVector) {
   // HIP
   jointVector.push_back( _hip );
-
 
   // LEG
   jointVector.push_back( _legHip );

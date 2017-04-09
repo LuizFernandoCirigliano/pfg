@@ -8,33 +8,34 @@ class JointInterface
 public:
   JointInterface(){}
   virtual ~JointInterface(){}
-  virtual void setJointStats(double posAmp, double negAmp, double neutralAngle, double phase, double T) = 0;
+  virtual void setJointStats(float posAmp, float negAmp, float neutralAngle, float phase, float T) = 0;
   virtual void update() = 0;
   virtual void reset() = 0;
-  virtual void prepareMoveToNeutralAngle(double T_ms) = 0;
+  virtual void prepareMoveToNeutralAngle(float T_ms) = 0;
   virtual void moveToNeutralAngle() = 0;
   bool _enabled = true;
 };
 
 class Joint : public VRepClass, public JointInterface {
 private:
-  double _posAmp;
-  double _negAmp;
-  double _neutralAngle;
-  double _t;
-  double _tDelta;
-  double _initPhase;
+  float _posAmp;
+  float _negAmp;
+  float _neutralAngle;
+  float _t;
+  float _tDelta;
+  float _initPhase;
+  float _amplFactor = 0;
   simxFloat _initAngle;
 public:
-  void setJointTargetPosition(double targetAngle);
+  void setJointTargetPosition(float targetAngle);
   Joint(int clientID, const char *jointName);
-  void setJointStats(double posAmp, double negAmp, double neutralAngle, double phase, double T_ms);
+  void setJointStats(float posAmp, float negAmp, float neutralAngle, float phase, float T_ms);
   void update();
   void reset();
-  void prepareMoveToNeutralAngle(double T_ms);
+  void prepareMoveToNeutralAngle(float T_ms);
   void moveToNeutralAngle();
-  double _currentAngle;
-  double _neutralAngleDelta;
+  float _currentAngle;
+  float _neutralAngleDelta;
 };
 
 #endif

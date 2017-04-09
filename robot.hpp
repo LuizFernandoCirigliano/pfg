@@ -8,6 +8,10 @@
 
 #include <vector>
 
+struct result{
+  float score, distance, time;
+};
+
 class Robot : public VRepClass {
   simxFloat _initialPosition[3];
   simxFloat _initialOrientation[3];
@@ -21,12 +25,12 @@ public:
   Robot(int clientID, const char* name);
   void reset();
   void update();
-  void setGenome( const std::vector<double> &genome );
+  void setGenome( const std::vector<float> &genome );
   void printPosition(simxFloat* position);
-  double getXDistance();
+  float getXDistance();
   void moveToNeutralAngle();
-  double runExperiment( const std::vector<double> &genome );
-  std::vector< std::pair<double, double> > getAleles();
+  result runExperiment( const std::vector<float> &genome );
+  std::vector< std::pair<float, float> > getAleles();
 };
 
 #endif

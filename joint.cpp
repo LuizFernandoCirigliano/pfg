@@ -14,9 +14,9 @@ Joint::Joint(int clientID, const char *jointName) :
     std::cout << _initAngle << std::endl;
   }
 
-void Joint::setJointStats(double posAmp, double negAmp, double neutralAngle, double phase, double T_ms) {
-  _posAmp = fabs(posAmp);
-  _negAmp = fabs(negAmp);
+void Joint::setJointStats(float posAmp, float negAmp, float neutralAngle, float phase, float T_ms) {
+  _posAmp = posAmp;
+  _negAmp = negAmp;
   _initPhase = phase;
   _neutralAngle = neutralAngle;
   _tDelta = 50.0/T_ms;
@@ -31,30 +31,38 @@ void Joint::setJointStats(double posAmp, double negAmp, double neutralAngle, dou
 
 void Joint::update() {
   if (!_enabled) return;
-  double amplitude = 0 < _t && _t < 0.5 ? _posAmp : _negAmp;
-  double newAngle = _neutralAngle + amplitude * sin(2 * PI * _t);
+  float amplitude = (0 < _t && _t < 0.5) || (-1 < _t && _t < -0.5) ? _posAmp : _negAmp;
+  float newAngle = _neutralAngle + _amplFactor * amplitude * sin(2 * PI * _t);
   _t += _tDelta;
+
+  if (_t >= 1.0) {
+    _t = 0;
+    if (_amplFactor < 1.0) _amplFactor += 0.25;
+  }
+
   this->setJointTargetPosition(newAngle);
 }
 
-void Joint::prepareMoveToNeutralAngle(double T_ms) {
-  double num_updates = T_ms/dt_ms;
-  double amplitude = 0 < _t && _t < 0.5 ? _posAmp : _negAmp;
-  double newAngle = _neutralAngle + amplitude * sin(2 * PI * _t);
+void Joint::prepareMoveToNeutralAngle(float T_ms) {
+  float num_updates = T_ms/dt_ms;
+  float amplitude = 0 < _t && _t < 0.5 ? _posAmp : _negAmp;
+  float newAngle = _neutralAngle + amplitude * sin(2 * PI * _t);
   _neutralAngleDelta = (newAngle - _currentAngle)/num_updates;
 }
 
 void Joint::moveToNeutralAngle() {
-  double newAngle = _currentAngle + _neutralAngleDelta;
+  float newAngle = _currentAngle + _neutralAngleDelta;
   this->setJointTargetPosition(newAngle);
 }
 
 void Joint::reset() {
   _t = _initPhase;
+  _amplFactor = 0.0;
+//  _currentAngle = _initAngle;
   this->setJointTargetPosition(_initAngle);
 }
 
-void Joint::setJointTargetPosition(double targetAngle) {
+void Joint::setJointTargetPosition(float targetAngle) {
   int ret = simxSetJointTargetPosition(_clientID, _handle, targetAngle, simx_opmode_oneshot);
   _currentAngle = targetAngle;
   #ifdef DEBUG

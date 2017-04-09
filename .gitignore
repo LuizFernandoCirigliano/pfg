@@ -34,3 +34,5 @@
 .DS_STORE
 bin/
 *.dat
+DerivedData/
+Robots.xcodeproj/

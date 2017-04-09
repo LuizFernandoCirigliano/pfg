@@ -79,5 +79,6 @@ float Objective(GAGenome& g) {
   }
   avgScore = avgScore/3.0;
   csv << std::setprecision(2) << avgScore << std::endl;
+  std::cout << std::setprecision(2) << avgScore << std::endl;
   return avgScore;
 }

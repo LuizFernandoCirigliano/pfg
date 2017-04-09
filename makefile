@@ -10,8 +10,6 @@ else
 endif
 
 all:
-	@rm -f bin/*.*
-	@rm -f *.o
 	g++ $(CFLAGS) $(CPPFLAGS) -c NAO.cpp -o NAO.o
 	g++ $(CFLAGS) $(CPPFLAGS) -c VRepClass.cpp -o VRepClass.o
 	g++ $(CFLAGS) $(CPPFLAGS) -c shape.cpp -o shape.o
@@ -25,3 +23,7 @@ all:
 	@mkdir -p bin
 	g++ NAO.o extApi.o extApiPlatform.o VRepClass.o shape.o joint.o jointPair.o robot.o main.o -o bin/main -lpthread -lga -lm
 	g++ NAO.o extApi.o extApiPlatform.o VRepClass.o shape.o joint.o jointPair.o robot.o test.o -o bin/test -lpthread -lga -lm
+
+clean:
+	@rm -f bin/*
+	@rm -f *.o

@@ -13,8 +13,6 @@ public:
   void setJointStats(float posAmp, float negAmp, float zeroAngle, float phase, float T);
   void update();
   void reset();
-  void prepareMoveToNeutralAngle(float T_ms);
-  void moveToNeutralAngle();
 };
 
 #endif

@@ -11,8 +11,6 @@ public:
   virtual void setJointStats(float posAmp, float negAmp, float neutralAngle, float phase, float T) = 0;
   virtual void update() = 0;
   virtual void reset() = 0;
-  virtual void prepareMoveToNeutralAngle(float T_ms) = 0;
-  virtual void moveToNeutralAngle() = 0;
   bool _enabled = true;
 };
 
@@ -32,8 +30,6 @@ public:
   void setJointStats(float posAmp, float negAmp, float neutralAngle, float phase, float T_ms);
   void update();
   void reset();
-  void prepareMoveToNeutralAngle(float T_ms);
-  void moveToNeutralAngle();
   float _currentAngle;
   float _neutralAngleDelta;
 };

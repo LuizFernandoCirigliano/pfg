@@ -29,7 +29,7 @@ int main(int argc, const char** argv) {
   }
 
   csv.open("ga.csv");
-
+  csv << "T, A, B, Oc, C, Oj tj, Dp, Dn, t1, dx1, dy, s1, t2, dx2, dy2, s2, t3, dx3, d3, s3, savg" << std::endl;
   r = new Robot(clientID, "NAO");
 
   GARealAlleleSetArray alleles;
@@ -42,8 +42,8 @@ int main(int argc, const char** argv) {
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
   params.set(gaNnGenerations, 200);
-  params.set(gaNpopulationSize, 100);
-  params.set(gaNscoreFrequency, 10);
+  params.set(gaNpopulationSize, 200);
+  params.set(gaNscoreFrequency, 5);
   params.set(gaNselectScores, (int)GAStatistics::AllScores);
 
   GASteadyStateGA ga1(genome);
@@ -74,7 +74,8 @@ float Objective(GAGenome& g) {
     result res = r->runExperiment(params);
     avgScore += res.score;
     csv << std::setprecision(2) << res.time << ", ";
-    csv << std::setprecision(2) << res.distance << ", ";
+    csv << std::setprecision(2) << res.dx << ", ";
+    csv << std::setprecision(2) << res.dy << ", ";
     csv << std::setprecision(2) << res.score << ", ";
   }
   avgScore = avgScore/3.0;

@@ -19,7 +19,7 @@ void Joint::setJointStats(float posAmp, float negAmp, float neutralAngle, float 
   _negAmp = negAmp;
   _initPhase = phase;
   _neutralAngle = neutralAngle;
-  _tDelta = 50.0/T_ms;
+  _tDelta = step_ms/T_ms;
   #ifdef DEBUG
   std::cout<< _name <<std::endl;
   std::cout<< std::setprecision(2) << _posAmp << ", ";
@@ -40,18 +40,6 @@ void Joint::update() {
     if (_amplFactor < 1.0) _amplFactor += 0.25;
   }
 
-  this->setJointTargetPosition(newAngle);
-}
-
-void Joint::prepareMoveToNeutralAngle(float T_ms) {
-  float num_updates = T_ms/dt_ms;
-  float amplitude = 0 < _t && _t < 0.5 ? _posAmp : _negAmp;
-  float newAngle = _neutralAngle + amplitude * sin(2 * PI * _t);
-  _neutralAngleDelta = (newAngle - _currentAngle)/num_updates;
-}
-
-void Joint::moveToNeutralAngle() {
-  float newAngle = _currentAngle + _neutralAngleDelta;
   this->setJointTargetPosition(newAngle);
 }
 

@@ -22,13 +22,3 @@ void JointPair::setJointStats(float posAmp, float negAmp, float neutralAngle, fl
   _leftJoint->setJointStats(posAmp, negAmp, neutralAngle, phase, T);
   _rightJoint->setJointStats(posAmp, negAmp, neutralAngle, phase + 0.5, T);
 }
-
-void JointPair::prepareMoveToNeutralAngle(float T_ms) {
-  _leftJoint->prepareMoveToNeutralAngle(T_ms);
-  _rightJoint->prepareMoveToNeutralAngle(T_ms);
-}
-
-void JointPair::moveToNeutralAngle() {
-  _leftJoint->moveToNeutralAngle();
-  _rightJoint->moveToNeutralAngle();
-}

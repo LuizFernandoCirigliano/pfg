@@ -9,7 +9,7 @@
 #include <vector>
 
 struct result{
-  float score, distance, time;
+  float score, dx, dy, time;
 };
 
 class Robot : public VRepClass {
@@ -27,8 +27,6 @@ public:
   void update();
   void setGenome( const std::vector<float> &genome );
   void printPosition(simxFloat* position);
-  float getXDistance();
-  void moveToNeutralAngle();
   result runExperiment( const std::vector<float> &genome );
   std::vector< std::pair<float, float> > getAleles();
 };

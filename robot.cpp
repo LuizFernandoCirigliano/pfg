@@ -9,7 +9,7 @@
 #include "NAO.hpp"
 
 
-const int step_ms = 50;
+
 
 Robot::Robot(int clientID, const char* name) :
   VRepClass(clientID, name) {
@@ -85,32 +85,15 @@ void Robot::reset() {
   }
 }
 
-void Robot::moveToNeutralAngle() {
-  float T = 500;
-  int num_updates = T/dt_ms;
-  for ( auto &j : _joints) {
-    if (j->_enabled) j->prepareMoveToNeutralAngle(T);
-  }
-  for (int i = 0; i < num_updates; i++) {
-    for ( auto &j : _joints) {
-      if (j->_enabled) j->moveToNeutralAngle();
-    }
-    simxSynchronousTrigger(_clientID);
-  }
-}
-
 result Robot::runExperiment( const std::vector<float> &genome ) {
   this->setGenome(genome);
   this->reset();
-//  this->reset();
   simxFloat position[3] = {0.0, 0.0, 0.0};
   simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
-  // this->moveToNeutralAngle();
-//  std::cout << _nao->_ankle->_leftJoint->_currentAngle << std::endl;
+  
   int i = 0;
   for(; i < 400; i++) {
     this->update();
-//    std::cout << _nao->_legHip->_leftJoint->_currentAngle << std::endl;
     simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
     if (position[2] < 0.15) {
       std::cout<< "Robot Fell" << std::endl;
@@ -120,9 +103,10 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
   for (int i = 0; i < 5; i++) {
     simxSynchronousTrigger(_clientID);
   }
-  float distance = this->getXDistance();
-  float score = 1.0 + 20.0*i/400.0 + 30.0*distance;
-  struct result r = {score, distance, i*0.050f};
+  float dx = position[0] - _initialPosition[0];
+  float dy = position[1] - _initialPosition[1];
+  float score = 1.0 + 20.0*i/400.0 + 30.0*dx;
+  struct result r = {score, dx, dy, i*step_ms/1000.0f};
   return r;
 }
 
@@ -153,9 +137,7 @@ void Robot::setGenome(const std::vector<float> &genome) {
   int i = 0;
   float T = genome[i++];
   std::cout << "T(ms): " << std::setprecision(2) << T << std::endl;
-  // if (_hip->enabled) {
-  //   _hip->setJointStats( genome[i++]);
-  // }
+
   if (_nao->_legHip->_enabled) {
     _nao->_legHip->setJointStats( genome[i], genome[i+1], genome[i+2], 0.0, T);
     i+=3;
@@ -169,12 +151,6 @@ void Robot::setGenome(const std::vector<float> &genome) {
     i+=2;
   }
 
-}
-
-float Robot::getXDistance() {
-  simxFloat position[3];
-  simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
-  return std::max(position[0] - _initialPosition[0], 0.0f);
 }
 
 void Robot::printPosition(simxFloat* position) {

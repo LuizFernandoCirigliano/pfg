@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <iomanip>
+#include <cmath>
 
 #include "helpers.hpp"
 #include "NAO.hpp"
@@ -92,7 +93,7 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
   simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
   
   int i = 0;
-  for(; i < 400; i++) {
+  for(; i < 600; i++) {
     this->update();
     simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
     if (position[2] < 0.15) {
@@ -105,7 +106,8 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
   }
   float dx = position[0] - _initialPosition[0];
   float dy = position[1] - _initialPosition[1];
-  float score = 1.0 + 20.0*i/400.0 + 30.0*dx;
+  float dist = sqrt(pow(dx, 2) + pow(dy, 2));
+  float score = 1.0 + 20.0*i/400.0 + 10.0*dist + 20.0*fmax(dx, 0.0f);
   struct result r = {score, dx, dy, i*step_ms/1000.0f};
   return r;
 }

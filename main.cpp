@@ -13,6 +13,8 @@ extern "C" {
 #include "robot.hpp"
 
 const int portNumber = 25000;
+unsigned seed = 100;
+
 std::ofstream csv;
 
 Robot* r = 0;
@@ -22,16 +24,17 @@ float Objective(GAGenome &);
 int main(int argc, const char** argv) {
   const char *address = argc == 2 ? argv[1] : "127.0.0.1";
   int clientID = simxStart(address, portNumber, true, true, 2000, 5);
-
+  
   if (clientID == -1) {
     std::cout << "Failed to Connect" << std::endl;
     return -1;
   }
 
   csv.open("ga.csv");
-  csv << "T, A, B, Oc, C, Oj tj, Dp, Dn, t1, dx1, dy, s1, t2, dx2, dy2, s2, t3, dx3, d3, s3, savg" << std::endl;
+  csv << "T, A, B, Oc, C, Oj tj, Dp, Dn, t1, dx1, dy1, s1, t2, dx2, dy2, s2, t3, dx3, dy3, s3, savg" << std::endl;
   r = new Robot(clientID, "NAO");
-
+  
+  GARandomSeed(seed);
   GARealAlleleSetArray alleles;
   for (auto &pair : r->getAleles()) {
     alleles.add(pair.first, pair.second);
@@ -44,6 +47,8 @@ int main(int argc, const char** argv) {
   params.set(gaNnGenerations, 200);
   params.set(gaNpopulationSize, 200);
   params.set(gaNscoreFrequency, 5);
+  params.set(gaNflushFrequency, 5);
+  params.set(gaNpMutation, 0.1);
   params.set(gaNselectScores, (int)GAStatistics::AllScores);
 
   GASteadyStateGA ga1(genome);
@@ -55,7 +60,7 @@ int main(int argc, const char** argv) {
   std::cout << "************************" << std::endl;
   std::cout << ga1.statistics() << std::endl;
   std::cout << "the ga generated:\n" << ga1.statistics().bestIndividual() << std::endl;
-
+  
   csv.close();
   delete r;
   return 0;

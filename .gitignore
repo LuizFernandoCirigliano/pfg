@@ -36,3 +36,5 @@ bin/
 *.dat
 DerivedData/
 Robots.xcodeproj/
+.vscode/
+*.rhistory

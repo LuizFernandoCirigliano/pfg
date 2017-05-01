@@ -8,7 +8,7 @@ extern "C" {
 #include <iostream>
 
 #define PI 3.14159265
-const int step_ms = 50;
+const int step_ms = 25;
 // #define DEBUG //comment to disable debug
 
 inline void log_response(int code) {

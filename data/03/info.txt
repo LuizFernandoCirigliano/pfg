@@ -1,0 +1,1 @@
+pop 150, mutation 0.05, blend crossover, steady state 0.8 replacement, hip roll

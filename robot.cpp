@@ -46,41 +46,44 @@ void Robot::update() {
   _nao->_ankle->_leftJoint->setJointTargetPosition(leftAnkleAngle);
   _nao->_ankle->_rightJoint->setJointTargetPosition(rightAnkleAngle);
 
+  float leftAnkleRollAngle = -1*_nao->_legHipRoll->_leftJoint->_currentAngle;
+  float rightAnkleRollAngle = -1*_nao->_legHipRoll->_rightJoint->_currentAngle;
+
+  _nao->_ankleRoll->_leftJoint->setJointTargetPosition(leftAnkleRollAngle);
+  _nao->_ankleRoll->_rightJoint->setJointTargetPosition(rightAnkleRollAngle);
+
   simxPauseCommunication(_clientID, 0);
 
-  // std::this_thread::sleep_for(std::chrono::milliseconds(step_ms));
   simxSynchronousTrigger(_clientID);
 }
 
 void Robot::reset() {
-  
-  
   simxPauseCommunication(_clientID, 1);
   for ( auto &j : _joints ) {
     j->reset();
   }
   _nao->_ankle->reset();
-  
-  
+  _nao->_ankleRoll->reset();
+
   simxPauseCommunication(_clientID, 0);
 
 
   for (int i = 0; i < 30; i++) {
     simxSynchronousTrigger(_clientID);
   }
-  
+
   simxPauseCommunication(_clientID, 1);
   int posRet = simxSetObjectPosition(_clientID, _handle, -1,
                                      _initialPosition, simx_opmode_oneshot);
   int oriRet = simxSetObjectOrientation(_clientID, _handle, -1,
-                                        _initialOrientation, simx_opmode_oneshot);
-  
+                                        _initialOrientation, simx_opmode_oneshot );
+
   for ( auto &s : _shapes ) {
     s.reset();
   }
 
   simxPauseCommunication(_clientID, 0);
-  
+
   for (int i = 0; i < 30; i++) {
     simxSynchronousTrigger(_clientID);
   }
@@ -91,7 +94,7 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
   this->reset();
   simxFloat position[3] = {0.0, 0.0, 0.0};
   simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
-  
+
   int i = 0;
   for(; i < 600; i++) {
     this->update();
@@ -115,23 +118,28 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
 std::vector< std::pair<float, float> > Robot::getAleles() {
   std::vector< std::pair<float, float> > alleles;
 
-  alleles.push_back( std::make_pair( 200.0, 2000.0) ); // T(ms)
+  alleles.push_back( std::make_pair( 200.0, 600.0) ); // T(ms)
   if (_nao->_legHip->_enabled) {
-    alleles.push_back( std::make_pair( -0.78, 0.0 ) ); //A: Pos Amplitude
-    alleles.push_back( std::make_pair( -0.40, 0.0 ) ); //B: Neg Amplitude
-    alleles.push_back( std::make_pair( -0.40, 0.0 ) ); //Oc : Neutral Angle
+    alleles.push_back( std::make_pair( -1.0, -0.2 ) ); //A: Pos Amplitude
+    alleles.push_back( std::make_pair( -0.4, 0.0 ) ); //B: Neg Amplitude
+    alleles.push_back( std::make_pair( -0.4, 0.0 ) ); //Oc : Neutral Angle
   }
 
   if (_nao->_knee->_enabled) {
-    alleles.push_back( std::make_pair( 0.0, 0.78) ); //C: pos amp
-    alleles.push_back( std::make_pair( 0.0, 0.7) ); //Oj: neutral angle
+    alleles.push_back( std::make_pair( 0.2, 1.4) ); //C: pos amp
+    alleles.push_back( std::make_pair( 0.0, 1.4) ); //Oj: neutral angle
     alleles.push_back( std::make_pair( 0.0, 0.5 ) ); //t: phase
   }
 
   if (_nao->_shoulder->_enabled) {
-    alleles.push_back( std::make_pair( 0.0, 0.5) ); //D+: pos amp
-    alleles.push_back( std::make_pair( 0.0, 0.5) ); //D-: neg amp
+    alleles.push_back( std::make_pair( 0.0, 1.0) ); //D+: pos amp
+    alleles.push_back( std::make_pair( 0.0, 1.0) ); //D-: neg amp
   }
+
+  if (_nao->_legHipRoll->_enabled) {
+    alleles.push_back( std::make_pair( 0.0, 0.5) ); // E: Pos amp
+  }
+
   return alleles;
 }
 
@@ -144,15 +152,22 @@ void Robot::setGenome(const std::vector<float> &genome) {
     _nao->_legHip->setJointStats( genome[i], genome[i+1], genome[i+2], 0.0, T);
     i+=3;
   }
+
   if (_nao->_knee->_enabled) {
     _nao->_knee->setJointStats( genome[i], 0.0, genome[i+1], genome[i+2], T);
     i+=3;
   }
+
   if (_nao->_shoulder->_enabled) {
     _nao->_shoulder->setJointStats( genome[i], genome[i+1], 1.57, 0.0, T);
     i+=2;
   }
 
+  if (_nao->_legHipRoll->_enabled) {
+    _nao ->_legHipRoll->_leftJoint->setJointStats( genome[i], 0.0, 0.0, 0.0, T);
+    _nao ->_legHipRoll->_rightJoint->setJointStats( -1*genome[i], 0.0, 0.0, 0.5, T);
+    i++;
+  }
 }
 
 void Robot::printPosition(simxFloat* position) {

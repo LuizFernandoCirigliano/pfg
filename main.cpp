@@ -24,16 +24,16 @@ float Objective(GAGenome &);
 int main(int argc, const char** argv) {
   const char *address = argc == 2 ? argv[1] : "127.0.0.1";
   int clientID = simxStart(address, portNumber, true, true, 2000, 5);
-  
+
   if (clientID == -1) {
     std::cout << "Failed to Connect" << std::endl;
     return -1;
   }
 
   csv.open("ga.csv");
-  csv << "T, A, B, Oc, C, Oj tj, Dp, Dn, t1, dx1, dy1, s1, t2, dx2, dy2, s2, t3, dx3, dy3, s3, savg" << std::endl;
+  csv << "T, A, B, Oc, C, Oj, tj, Dp, Dn, E, t1, dx1, dy1, s1, t2, dx2, dy2, s2, savg" << std::endl;
   r = new Robot(clientID, "NAO");
-  
+
   GARandomSeed(seed);
   GARealAlleleSetArray alleles;
   for (auto &pair : r->getAleles()) {
@@ -41,26 +41,26 @@ int main(int argc, const char** argv) {
   }
 
   GARealGenome genome(alleles, Objective);
+  genome.crossover(GARealBlendCrossover);
 
   GAParameterList params;
   GASteadyStateGA::registerDefaultParameters(params);
-  params.set(gaNnGenerations, 200);
-  params.set(gaNpopulationSize, 200);
+  params.set(gaNnGenerations, 20);
+  params.set(gaNpopulationSize, 150);
   params.set(gaNscoreFrequency, 5);
   params.set(gaNflushFrequency, 5);
-  params.set(gaNpMutation, 0.1);
+  params.set(gaNpMutation, 0.05);
   params.set(gaNselectScores, (int)GAStatistics::AllScores);
 
   GASteadyStateGA ga1(genome);
-  ga1.pReplacement(0.5);
+  ga1.pReplacement(0.8);
   ga1.set(gaNscoreFilename, "bog1.dat");
-  std::cout << "\nrunning ga number 1 (alternate allele(0) and allele(3))..."<< std::endl;
   ga1.evolve();
 
   std::cout << "************************" << std::endl;
   std::cout << ga1.statistics() << std::endl;
   std::cout << "the ga generated:\n" << ga1.statistics().bestIndividual() << std::endl;
-  
+
   csv.close();
   delete r;
   return 0;
@@ -75,7 +75,7 @@ float Objective(GAGenome& g) {
     csv << std::setprecision(3) << params[i] << ", ";
   }
   float avgScore = 0.0;
-  for(int i=0; i<3; i++) {
+  for(int i=0; i< 2; i++) {
     result res = r->runExperiment(params);
     avgScore += res.score;
     csv << std::setprecision(2) << res.time << ", ";

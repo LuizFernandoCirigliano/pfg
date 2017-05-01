@@ -21,8 +21,8 @@ int main(int argc, const char** argv) {
 
   r = new Robot(clientID, "NAO");
   
-//  std::vector<float> params {267, -0.22, -0.194, -0.254, 0.414, 0.523, 0.13, 0.201, 0.335};
-//  std::vector<float> params {480, -0.378, -0.202, -0.315, 0.676, 0.58, 0.228, 0.33,  0};
+//  std::vector<float> params {480, -0.378, -0.202, -0.315, 0.676, 0.58, 0.228, 0.33,  0, 0.1};
+  std::vector<float> params {270, -0.51, -0.21, -0.36, 0.72, 0.81, 0.36, 0.23, 0.31,  0.12};
   for (int i = 0; i < 10; i++) {
     result res = r->runExperiment(params);
     std::cout << res.time << " " << res.dx << " " << res.dy << " " << res.score << std::endl;

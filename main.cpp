@@ -31,7 +31,7 @@ int main(int argc, const char** argv) {
   }
 
   csv.open("ga.csv");
-  csv << "T, A, B, Oc, C, Oj, tj, Dp, Dn, E, t1, dx1, dy1, s1, t2, dx2, dy2, s2, savg" << std::endl;
+  csv << "T, A, B, Oc, C, Oj, tj, Dp, Dn, E, t1, dx1, dy1, s1, t2, dx2, dy2, s2, t3, dx3, dy3, s3, savg" << std::endl;
   r = new Robot(clientID, "NAO");
 
   GARandomSeed(seed);
@@ -75,7 +75,7 @@ float Objective(GAGenome& g) {
     csv << std::setprecision(3) << params[i] << ", ";
   }
   float avgScore = 0.0;
-  for(int i=0; i< 2; i++) {
+  for(int i=0; i< 3; i++) {
     result res = r->runExperiment(params);
     avgScore += res.score;
     csv << std::setprecision(2) << res.time << ", ";

@@ -1,7 +1,7 @@
 library(ggplot2)
 library(gridExtra)
 
-x <- read.csv("02/ga.csv", as.is = TRUE)
+x <- read.csv("04/ga.csv", as.is = TRUE)
 x$num <- 1:length(x$T)
 qplot(x$num, x$savg,
       geom=c("point", "smooth"),

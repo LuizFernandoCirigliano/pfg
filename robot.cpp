@@ -94,12 +94,14 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
   this->reset();
   simxFloat position[3] = {0.0, 0.0, 0.0};
   simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
-
+  simxFloat maxZ = 0.0;
   int i = 0;
   for(; i < 600; i++) {
     this->update();
     simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
-    if (position[2] < 0.15) {
+    if (position[2] > maxZ) {
+      maxZ = position[2];
+    } else if (position[2] < maxZ - 0.15) {
       std::cout<< "Robot Fell" << std::endl;
       break;
     }
@@ -110,7 +112,7 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
   float dx = position[0] - _initialPosition[0];
   float dy = position[1] - _initialPosition[1];
   float dist = sqrt(pow(dx, 2) + pow(dy, 2));
-  float score = 1.0 + 20.0*i/400.0 + 10.0*dist + 20.0*fmax(dx, 0.0f);
+  float score = 1.0 + 15.0*i/600.0 + 10.0*dist + 20.0*fmax(dx, 0.0f);
   struct result r = {score, dx, dy, i*step_ms/1000.0f};
   return r;
 }
@@ -122,12 +124,12 @@ std::vector< std::pair<float, float> > Robot::getAleles() {
   if (_nao->_legHip->_enabled) {
     alleles.push_back( std::make_pair( -1.0, -0.2 ) ); //A: Pos Amplitude
     alleles.push_back( std::make_pair( -0.4, 0.0 ) ); //B: Neg Amplitude
-    alleles.push_back( std::make_pair( -0.4, 0.0 ) ); //Oc : Neutral Angle
+    alleles.push_back( std::make_pair( -0.5, 0.0 ) ); //Oc : Neutral Angle
   }
 
   if (_nao->_knee->_enabled) {
-    alleles.push_back( std::make_pair( 0.2, 1.4) ); //C: pos amp
-    alleles.push_back( std::make_pair( 0.0, 1.4) ); //Oj: neutral angle
+    alleles.push_back( std::make_pair( 0.2, 2) ); //C: pos amp
+    alleles.push_back( std::make_pair( 0.0, 2) ); //Oj: neutral angle
     alleles.push_back( std::make_pair( 0.0, 0.5 ) ); //t: phase
   }
 

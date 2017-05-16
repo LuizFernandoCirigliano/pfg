@@ -15,6 +15,7 @@ public:
   JointPair *_legHip;
   JointPair *_legHipRoll;
   JointPair *_shoulder;
+  JointPair *_elbow;
   NAO(int clientID);
   void getNAOJoints(std::vector<JointInterface *> &jointVector);
 };

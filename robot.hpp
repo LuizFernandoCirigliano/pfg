@@ -27,7 +27,7 @@ public:
   void update();
   void setGenome( const std::vector<float> &genome );
   void printPosition(simxFloat* position);
-  result runExperiment( const std::vector<float> &genome );
+  result runExperiment( const std::vector<float> &genome, const float time_s, const std::string label);
   std::vector< std::pair<float, float> > getAleles();
 };
 

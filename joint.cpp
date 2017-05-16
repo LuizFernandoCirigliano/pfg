@@ -46,7 +46,6 @@ void Joint::update() {
 void Joint::reset() {
   _t = _initPhase;
   _amplFactor = 0.0;
-//  _currentAngle = _initAngle;
   this->setJointTargetPosition(_initAngle);
 }
 

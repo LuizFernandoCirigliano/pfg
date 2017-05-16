@@ -1,15 +1,14 @@
 #include "robot.hpp"
 #include <iostream>
-
+#include <fstream>
 #include <chrono>
 #include <thread>
 #include <iomanip>
 #include <cmath>
+#include <string>
 
 #include "helpers.hpp"
 #include "NAO.hpp"
-
-
 
 
 Robot::Robot(int clientID, const char* name) :
@@ -89,16 +88,20 @@ void Robot::reset() {
   }
 }
 
-result Robot::runExperiment( const std::vector<float> &genome ) {
+result Robot::runExperiment( const std::vector<float> &genome, const float time_s, const std::string label) {
+  std::ofstream routefile;
+  routefile.open("rotas/" + label + ".csv");
   this->setGenome(genome);
   this->reset();
   simxFloat position[3] = {0.0, 0.0, 0.0};
   simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
   simxFloat maxZ = 0.0;
   int i = 0;
-  for(; i < 600; i++) {
+  float num_ticks = time_s*1000/step_ms;
+  for(; i < num_ticks; i++) {
     this->update();
     simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
+    routefile << std::setprecision(3) << position[0] << ", " << position[1] << ", " << position[2] << std::endl;
     if (position[2] > maxZ) {
       maxZ = position[2];
     } else if (position[2] < maxZ - 0.15) {
@@ -106,14 +109,17 @@ result Robot::runExperiment( const std::vector<float> &genome ) {
       break;
     }
   }
-  for (int i = 0; i < 5; i++) {
+  routefile.close();
+
+  for (int j = 0; j < 5; j++) {
     simxSynchronousTrigger(_clientID);
   }
   float dx = position[0] - _initialPosition[0];
   float dy = position[1] - _initialPosition[1];
   float dist = sqrt(pow(dx, 2) + pow(dy, 2));
-  float score = 1.0 + 15.0*i/600.0 + 10.0*dist + 20.0*fmax(dx, 0.0f);
+  float score = 1.0 + 15.0*i/600 + 10.0*dist + 20.0*fmax(dx, 0.0f);
   struct result r = {score, dx, dy, i*step_ms/1000.0f};
+  
   return r;
 }
 
@@ -128,7 +134,7 @@ std::vector< std::pair<float, float> > Robot::getAleles() {
   }
 
   if (_nao->_knee->_enabled) {
-    alleles.push_back( std::make_pair( 0.2, 2) ); //C: pos amp
+    alleles.push_back( std::make_pair( 0.2, 3.1) ); //C: pos amp
     alleles.push_back( std::make_pair( 0.0, 2) ); //Oj: neutral angle
     alleles.push_back( std::make_pair( 0.0, 0.5 ) ); //t: phase
   }
@@ -142,13 +148,18 @@ std::vector< std::pair<float, float> > Robot::getAleles() {
     alleles.push_back( std::make_pair( 0.0, 0.5) ); // E: Pos amp
   }
 
+  if (_nao->_elbow->_enabled) {
+    alleles.push_back( std::make_pair( 0.0, 1) );
+    alleles.push_back( std::make_pair( 0.0, 1.55) );
+  }
+
   return alleles;
 }
 
 void Robot::setGenome(const std::vector<float> &genome) {
   int i = 0;
   float T = genome[i++];
-  std::cout << "T(ms): " << std::setprecision(2) << T << std::endl;
+  // std::cout << "T(ms): " << std::setprecision(2) << T << std::endl;
 
   if (_nao->_legHip->_enabled) {
     _nao->_legHip->setJointStats( genome[i], genome[i+1], genome[i+2], 0.0, T);
@@ -169,6 +180,12 @@ void Robot::setGenome(const std::vector<float> &genome) {
     _nao ->_legHipRoll->_leftJoint->setJointStats( genome[i], 0.0, 0.0, 0.0, T);
     _nao ->_legHipRoll->_rightJoint->setJointStats( -1*genome[i], 0.0, 0.0, 0.5, T);
     i++;
+  }
+
+  if (_nao->_elbow->_enabled) {
+    _nao->_elbow->_leftJoint->setJointStats( -1*genome[i], -1*genome[i+1], 0.0, 0.0, T);
+    _nao->_elbow->_rightJoint->setJointStats( genome[i], genome[i+1], 0.0, 0.5, T);
+    i+=2;
   }
 }
 

@@ -13,6 +13,7 @@ NAO::NAO(int clientID) :
     _shoulder = new JointPair(_clientID, "RShoulderPitch3", "LShoulderPitch3");
 
     _elbow = new JointPair(_clientID, "RElbowRoll3", "LElbowRoll3");
+    // _elbow->_enabled=false;
 }
 
 void NAO::getNAOJoints(std::vector<JointInterface *> &jointVector) {
@@ -26,5 +27,5 @@ void NAO::getNAOJoints(std::vector<JointInterface *> &jointVector) {
   
   jointVector.push_back( _legHipRoll );
 
-  jointVector.push_back( _elbow );
+  // jointVector.push_back( _elbow );
 }

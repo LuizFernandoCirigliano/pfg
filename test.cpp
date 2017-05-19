@@ -23,10 +23,11 @@ int main(int argc, const char** argv) {
   r = new Robot(clientID, "NAO");
   
   //std::vector<float> params {236, -0.745, -0.237, -0.2, 1.62, 0.649, 0.12, 0.528, 0.336, -0.0941}; // RAMPA
-  std::vector<float> params {297, -0.830, -0.259, -0.203, 2.88, 0.508, 0.1430, 0.3750, 0.677, -0.0491}; // PLANO
-  for (int i = 0; i < 10; i++) {
+  // std::vector<float> params {297, -0.830, -0.259, -0.203, 2.88, 0.508, 0.1430, 0.3750, 0.677, -0.0491}; // PLANO
+  std::vector<float> params {295, -0.872,-0.117,-0.211,3.29,0.622,0.171,0.357,0.307,-0.0128};
+  for (int i = 0; i < 1; i++) {
     std::string label = "teste_" + std::to_string(i);
-    result res = r->runExperiment(params, 15.0, label);
+    result res = r->runExperiment(params, 60*15.0, label);
     std::cout << "Tempo: " << res.time << ", dx: " << res.dx << ", dy: " << res.dy << std::endl;
   }
 

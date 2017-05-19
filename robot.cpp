@@ -102,6 +102,9 @@ result Robot::runExperiment( const std::vector<float> &genome, const float time_
     this->update();
     simxGetObjectPosition(_clientID, _handle, -1, position, simx_opmode_streaming);
     routefile << std::setprecision(3) << position[0] << ", " << position[1] << ", " << position[2] << std::endl;
+    if (i%500==0){
+      std::cout << "x: " << position[0] << std::endl;
+    }
     if (position[2] > maxZ) {
       maxZ = position[2];
     } else if (position[2] < maxZ - 0.15) {
